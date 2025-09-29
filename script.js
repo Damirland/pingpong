@@ -73,6 +73,26 @@ function moveBall() {
     ball.y += ball.dy
 }
 
+function resetGame() {
+    if ((ball.x < 0 || ball.x > map.width) && !ball.isResetted) {
+        ball.isResetted = true;
+        setTimeout(() => {
+            ball.x = map.width / 2;
+            ball.y = map.height / 2;
+            ball.isResetted = false;
+        }, 1000);
+    }
+}
+
+function collideWallsWithPaddle(paddle) {
+    if (paddle.y < grid) {
+        paddle.y = grid;
+    }
+    else if (paddle.y > maxPaddleY) {
+        paddle.y = maxPaddleY;
+    }
+}
+
 function loop () {
     clearMap()
 
@@ -80,6 +100,8 @@ function loop () {
     renderRightPaddle() 
     
     movePaddles()
+
+    collideWallsWithPaddle(leftPaddle)
 
     renderBall()
     moveBall()
