@@ -5,10 +5,10 @@ canvas.fillStyle = "rgb(228, 164, 87)"
 
 const grid = 15
 const paddleHeight = grid * 5
-const maxPaddlyY = map.height - grid - paddleHeight
+const maxPaddleY = map.height - grid - paddleHeight
 
-let ballSpeed = 5
-let paddleSpeed = 7
+let ballSpeed = 3
+let paddleSpeed = 5
 
 const leftPaddle = {
     x: grid * 2,
@@ -79,8 +79,8 @@ function resetGame() {
         setTimeout(() => {
             ball.x = map.width / 2;
             ball.y = map.height / 2;
-            ball.isResetted = false;
-        }, 1000);
+            ball.isResetted = false;    
+        }, 2000);
     }
 }
 
@@ -93,19 +93,71 @@ function collideWallsWithPaddle(paddle) {
     }
 }
 
+function collideWallsWithBall() {
+    if (ball.y < grid) {
+        ball.y = grid;
+        ball.dy = -ball.dy;
+    }
+    else if (ball.y > map.height - grid) {
+        ball.y = map.height - grid;
+        ball.dy = -ball.dy;
+    }
+}
+
+function isCollides(object1, object2) {
+    const width1 = object1.x + object1.width;
+    const width2 = object2.x + object2.width;
+    const height1 = object1.y + object1.height;
+    const height2 = object2.y + object2.height;
+    return object1.x < width2
+        && object2.x < width1
+        && object1.y < height2
+        && object2.y < height1;
+}
+
+function collidePaddlesWithBall() {
+    if (isCollides(ball, rightPaddle)) {
+        ball.dx = -ball.dx;
+        ball.x = rightPaddle.x - ball.width;
+    }
+    else if (isCollides(ball, leftPaddle)) {
+        ball.dx = -ball.dx;
+        ball.x = leftPaddle.x + leftPaddle.width;
+    }
+}
+
+function aiControl() {
+    let direction = 0;
+
+    if (ball.y < rightPaddle.y) {
+        direction = -1;
+    }
+    else if (ball.y > rightPaddle.y + paddleHeight) {
+        direction = 1;
+    }
+
+    rightPaddle.y += paddleSpeed * direction;
+}
+
 function loop () {
     clearMap()
 
     renderLeftPaddle()
-    renderRightPaddle() 
-    
+    renderRightPaddle()
+
+    aiControl()
     movePaddles()
 
+    
     collideWallsWithPaddle(leftPaddle)
-
+    collideWallsWithPaddle(rightPaddle)
+    
     renderBall()
     moveBall()
+    collidePaddlesWithBall()
+    collideWallsWithBall()
 
+    resetGame()
     renderMap()
     requestAnimationFrame(loop)
 }
